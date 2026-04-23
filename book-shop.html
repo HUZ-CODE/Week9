@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookHub - Your Premier Online Bookstore</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="design.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container-lg">
+            <a class="navbar-brand" href="#home">
+                <i class="fas fa-book"></i> BookHub
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#books">Books</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="toggleCart()" style="position: relative;">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="badge-cart" id="cart-count">0</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero" id="home">
+        <div class="container-lg">
+            <h1><i class="fas fa-book-open"></i> Welcome to BookHub</h1>
+            <p>Discover your next favorite book from our vast collection</p>
+            
+            <div class="search-container" style="max-width: 600px; margin: 0 auto;">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search by title, author, or category...">
+                <button class="btn-search" onclick="searchBooks()">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section id="books">
+        <div class="container-lg">
+            <div class="row">
+                <div class="col-lg-3 d-none d-lg-block">
+                    <div class="sidebar">
+                        <div class="filter-section">
+                            <h5 class="filter-title"><i class="fas fa-filter"></i> Categories</h5>
+                            <div class="filter-group">
+                                <label><input type="checkbox" class="category-filter" value="fiction"> Fiction</label>
+                                <label><input type="checkbox" class="category-filter" value="non-fiction"> Non-Fiction</label>
+                                <label><input type="checkbox" class="category-filter" value="mystery"> Mystery</label>
+                                <label><input type="checkbox" class="category-filter" value="sci-fi"> Science Fiction</label>
+                                <label><input type="checkbox" class="category-filter" value="romance"> Romance</label>
+                                <label><input type="checkbox" class="category-filter" value="biography"> Biography</label>
+                            </div>
+                        </div>
+
+                        <div class="filter-section">
+                            <h5 class="filter-title"><i class="fas fa-dollar-sign"></i> Price Range</h5>
+                            <div class="filter-group">
+                                <label><input type="checkbox" class="price-filter" value="0-20"> Under $20</label>
+                                <label><input type="checkbox" class="price-filter" value="20-50"> $20 - $50</label>
+                                <label><input type="checkbox" class="price-filter" value="50-100"> $50 - $100</label>
+                                <label><input type="checkbox" class="price-filter" value="100+"> Over $100</label>
+                            </div>
+                        </div>
+
+                        <div class="filter-section">
+                            <h5 class="filter-title"><i class="fas fa-star"></i> Rating</h5>
+                            <div class="filter-group">
+                                <label><input type="checkbox" class="rating-filter" value="5"> ⭐⭐⭐⭐⭐ 5 Stars</label>
+                                <label><input type="checkbox" class="rating-filter" value="4"> ⭐⭐⭐⭐ 4+ Stars</label>
+                                <label><input type="checkbox" class="rating-filter" value="3"> ⭐⭐⭐ 3+ Stars</label>
+                            </div>
+                        </div>
+
+                        <div class="filter-section">
+                            <h5 class="filter-title"><i class="fas fa-sort"></i> Sort By</h5>
+                            <select id="sortSelect" class="form-select" onchange="sortBooks(this.value)">
+                                <option value="default">Default</option>
+                                <option value="price-low">Price: Low to High</option>
+                                <option value="price-high">Price: High to Low</option>
+                                <option value="rating">Highest Rating</option>
+                                <option value="newest">Newest First</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-9">
+                    <div class="row" id="booksContainer"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <span>Shopping Cart</span>
+            <button class="close-cart" onclick="toggleCart()"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="cartItems"></div>
+        <div id="cartSummary" style="display: none;">
+            <div class="cart-summary">
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span>$<span id="subtotal">0.00</span></span>
+                </div>
+                <div class="summary-row">
+                    <span>Tax (10%):</span>
+                    <span>$<span id="tax">0.00</span></span>
+                </div>
+                <div class="summary-total">
+                    <span>Total:</span>
+                    <span>$<span id="total">0.00</span></span>
+                </div>
+                <button class="btn-checkout" onclick="checkout()">
+                    <i class="fas fa-check"></i> Proceed to Checkout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer" id="about">
+        <div class="container-lg">
+            <div class="row mb-4">
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <h6 class="footer-title"><i class="fas fa-book"></i> BookHub</h6>
+                    <p style="font-size: 0.95rem; opacity: 0.8;">Your premier destination for quality books and excellent customer service.</p>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <h6 class="footer-title">Quick Links</h6>
+                    <a href="#home" class="footer-link">Home</a>
+                    <a href="#books" class="footer-link">Shop Books</a>
+                    <a href="#" class="footer-link">About Us</a>
+                    <a href="#" class="footer-link">FAQ</a>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <h6 class="footer-title">Customer Service</h6>
+                    <a href="#" class="footer-link">Contact Us</a>
+                    <a href="#" class="footer-link">Shipping Info</a>
+                    <a href="#" class="footer-link">Returns</a>
+                    <a href="#" class="footer-link">Privacy Policy</a>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-4" id="contact">
+                    <h6 class="footer-title">Connect With Us</h6>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                    <p style="font-size: 0.9rem; margin-top: 1rem; opacity: 0.8;">
+                        <i class="fas fa-envelope"></i> info@bookhub.com<br>
+                        <i class="fas fa-phone"></i> +1 (800) 123-4567
+                    </p>
+                </div>
+            </div>
+            <div class="footer-divider">
+                <p style="text-align: center; margin: 0; opacity: 0.7; font-size: 0.9rem;">
+                    &copy; 2024 BookHub. All rights reserved. | Built with <i class="fas fa-heart" style="color: var(--accent);"></i> for book lovers
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const booksData = [
+            {
+                id: 1,
+                title: "The Great Gatsby",
+                author: "F. Scott Fitzgerald",
+                price: 12.99,
+                originalPrice: 19.99,
+                category: "fiction",
+                rating: 4.8,
+                reviews: 342,
+                image: "📚",
+                discount: 35
+            },
+            {
+                id: 2,
+                title: "To Kill a Mockingbird",
+                author: "Harper Lee",
+                price: 14.99,
+                originalPrice: 24.99,
+                category: "fiction",
+                rating: 4.9,
+                reviews: 521,
+                image: "📖",
+                discount: 40
+            },
+            {
+                id: 3,
+                title: "Sapiens",
+                author: "Yuval Noah Harari",
+                price: 18.99,
+                originalPrice: 28.99,
+                category: "non-fiction",
+                rating: 4.7,
+                reviews: 489,
+                image: "📕",
+                discount: 34
+            },
+            {
+                id: 4,
+                title: "Dune",
+                author: "Frank Herbert",
+                price: 16.99,
+                originalPrice: 26.99,
+                category: "sci-fi",
+                rating: 4.6,
+                reviews: 612,
+                image: "📗",
+                discount: 37
+            },
+            {
+                id: 5,
+                title: "The Midnight Library",
+                author: "Matt Haig",
+                price: 15.99,
+                originalPrice: 25.99,
+                category: "fiction",
+                rating: 4.5,
+                reviews: 387,
+                image: "📙",
+                discount: 38
+            },
+            {
+                id: 6,
+                title: "A Brief History of Time",
+                author: "Stephen Hawking",
+                price: 17.99,
+                originalPrice: 27.99,
+                category: "non-fiction",
+                rating: 4.4,
+                reviews: 298,
+                image: "📘",
+                discount: 36
+            },
+            {
+                id: 7,
+                title: "The Girl with the Dragon Tattoo",
+                author: "Stieg Larsson",
+                price: 13.99,
+                originalPrice: 23.99,
+                category: "mystery",
+                rating: 4.7,
+                reviews: 445,
+                image: "📓",
+                discount: 42
+            },
+            {
+                id: 8,
+                title: "Educated",
+                author: "Tara Westover",
+                price: 19.99,
+                originalPrice: 29.99,
+                category: "biography",
+                rating: 4.8,
+                reviews: 576,
+                image: "📔",
+                discount: 33
+            },
+            {
+                id: 9,
+                title: "The Hobbit",
+                author: "J.R.R. Tolkien",
+                price: 11.99,
+                originalPrice: 21.99,
+                category: "fiction",
+                rating: 4.9,
+                reviews: 689,
+                image: "📕",
+                discount: 45
+            }
+        ];
+
+        let cart = [];
+        let filteredBooks = [...booksData];
+
+        function init() {
+            renderBooks(filteredBooks);
+            attachFilterListeners();
+        }
+
+        function renderBooks(books) {
+            const container = document.getElementById('booksContainer');
+            container.innerHTML = '';
+
+            if (books.length === 0) {
+                container.innerHTML = '<div class="col-12 text-center py-5"><p style="font-size: 1.1rem; color: #7f8c8d;">No books found. Try adjusting your filters.</p></div>';
+                return;
+            }
+
+            books.forEach(book => {
+                const stars = '⭐'.repeat(Math.floor(book.rating));
+                const bookCard = document.createElement('div');
+                bookCard.className = 'col-md-6 col-lg-4 mb-4';
+                bookCard.innerHTML = `
+                    <div class="book-card">
+                        <div class="book-image">
+                            <span style="font-size: 4rem;">${book.image}</span>
+                            ${book.discount ? `<div class="book-badge">-${book.discount}%</div>` : ''}
+                        </div>
+                        <div class="book-info">
+                            <h3 class="book-title">${book.title}</h3>
+                            <p class="book-author">by ${book.author}</p>
+                            <div class="book-rating">
+                                ${stars}
+                                <span style="color: #7f8c8d; font-size: 0.8rem;">(${book.reviews})</span>
+                            </div>
+                            <div style="margin-bottom: 0.75rem;">
+                                <span class="original-price">$${book.originalPrice.toFixed(2)}</span>
+                                <span class="book-price">$${book.price.toFixed(2)}</span>
+                            </div>
+                            <button class="btn-primary-custom" onclick="addToCart(${book.id})">
+                                <i class="fas fa-cart-plus"></i> Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(bookCard);
+            });
+        }
+
+        function addToCart(bookId) {
+            const book = booksData.find(b => b.id === bookId);
+            const existingItem = cart.find(item => item.id === bookId);
+
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ ...book, quantity: 1 });
+            }
+
+            updateCartUI();
+            showNotification(`${book.title} added to cart!`);
+        }
+
+        function updateCartUI() {
+            const cartItemsContainer = document.getElementById('cartItems');
+            const cartCountBadge = document.getElementById('cart-count');
+            const cartSummary = document.getElementById('cartSummary');
+
+            cartCountBadge.textContent = cart.length;
+
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '<div class="cart-empty"><i class="fas fa-shopping-cart" style="font-size: 3rem; margin-bottom: 1rem;"></i><p>Your cart is empty</p></div>';
+                cartSummary.style.display = 'none';
+                return;
+            }
+
+            cartSummary.style.display = 'block';
+            cartItemsContainer.innerHTML = cart.map(item => `
+                <div class="cart-item">
+                    <div class="cart-item-image">${item.image}</div>
+                    <div class="cart-item-details">
+                        <div class="cart-item-title">${item.title}</div>
+                        <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+                        <div class="quantity-control">
+                            <button onclick="updateQuantity(${item.id}, -1)">−</button>
+                            <span style="min-width: 20px; text-align: center;">${item.quantity}</span>
+                            <button onclick="updateQuantity(${item.id}, 1)">+</button>
+                        </div>
+                    </div>
+                    <button style="background: none; border: none; color: var(--accent); cursor: pointer; font-size: 1.2rem;" onclick="removeFromCart(${item.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+
+            updateCartSummary();
+        }
+
+        function updateQuantity(bookId, change) {
+            const item = cart.find(i => i.id === bookId);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    removeFromCart(bookId);
+                } else {
+                    updateCartUI();
+                }
+            }
+        }
+
+        function removeFromCart(bookId) {
+            cart = cart.filter(item => item.id !== bookId);
+            updateCartUI();
+        }
+
+        function updateCartSummary() {
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const tax = subtotal * 0.1;
+            const total = subtotal + tax;
+
+            document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+            document.getElementById('tax').textContent = tax.toFixed(2);
+            document.getElementById('total').textContent = total.toFixed(2);
+        }
+
+        function toggleCart() {
+            document.getElementById('cartSidebar').classList.toggle('active');
+        }
+
+        function attachFilterListeners() {
+            document.querySelectorAll('.category-filter, .price-filter, .rating-filter').forEach(filter => {
+                filter.addEventListener('change', applyFilters);
+            });
+        }
+
+        function applyFilters() {
+            const selectedCategories = Array.from(document.querySelectorAll('.category-filter:checked')).map(el => el.value);
+            const selectedPrices = Array.from(document.querySelectorAll('.price-filter:checked')).map(el => el.value);
+            const selectedRatings = Array.from(document.querySelectorAll('.rating-filter:checked')).map(el => parseInt(el.value));
+
+            filteredBooks = booksData.filter(book => {
+                const categoryMatch = selectedCategories.length === 0 || selectedCategories.includes(book.category);
+                
+                let priceMatch = selectedPrices.length === 0;
+                if (selectedPrices.length > 0) {
+                    priceMatch = selectedPrices.some(range => {
+                        if (range === '0-20') return book.price < 20;
+                        if (range === '20-50') return book.price >= 20 && book.price < 50;
+                        if (range === '50-100') return book.price >= 50 && book.price < 100;
+                        if (range === '100+') return book.price >= 100;
+                    });
+                }
+
+                let ratingMatch = selectedRatings.length === 0;
+                if (selectedRatings.length > 0) {
+                    ratingMatch = selectedRatings.some(rating => book.rating >= rating);
+                }
+
+                return categoryMatch && priceMatch && ratingMatch;
+            });
+
+            renderBooks(filteredBooks);
+        }
+
+        function sortBooks(sortType) {
+            switch(sortType) {
+                case 'price-low':
+                    filteredBooks.sort((a, b) => a.price - b.price);
+                    break;
+                case 'price-high':
+                    filteredBooks.sort((a, b) => b.price - a.price);
+                    break;
+                case 'rating':
+                    filteredBooks.sort((a, b) => b.rating - a.rating);
+                    break;
+                case 'newest':
+                    filteredBooks.sort((a, b) => b.id - a.id);
+                    break;
+                default:
+                    filteredBooks = [...booksData];
+            }
+            renderBooks(filteredBooks);
+        }
+
+        function searchBooks() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            filteredBooks = booksData.filter(book =>
+                book.title.toLowerCase().includes(query) ||
+                book.author.toLowerCase().includes(query) ||
+                book.category.toLowerCase().includes(query)
+            );
+            renderBooks(filteredBooks);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('searchInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') searchBooks();
+            });
+            init();
+        });
+
+        function checkout() {
+            if (cart.length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
+            const total = document.getElementById('total').textContent;
+            alert(`Thank you for your purchase! Total: $${total}\n\nThis is a demo. In a real application, you would be redirected to a payment gateway.`);
+            cart = [];
+            updateCartUI();
+            toggleCart();
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        document.addEventListener('click', (e) => {
+            const cartSidebar = document.getElementById('cartSidebar');
+            const cartToggle = document.querySelector('[onclick="toggleCart()"]');
+            if (!cartSidebar.contains(e.target) && !cartToggle.contains(e.target) && cartSidebar.classList.contains('active')) {
+                toggleCart();
+            }
+        });
+    </script>
+</body>
+</html>
