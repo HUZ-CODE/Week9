@@ -9,6 +9,11 @@
     <link href="design.css" rel="stylesheet">
 </head>
 <body>
+    <!-- NEW: Dark mode toggle button -->
+    <button onclick="toggleDarkMode()" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: var(--primary); color: white; border: none; border-radius: 50px; padding: 12px 20px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <i class="fas fa-moon"></i> Dark Mode
+    </button>
+
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container-lg">
             <a class="navbar-brand" href="#home">
@@ -21,12 +26,20 @@
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="#books">Books</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#featured">Featured</a></li> <!-- NEW -->
                     <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
                     <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
                     <li class="nav-item">
                         <a class="nav-link" href="#" onclick="toggleCart()" style="position: relative;">
                             <i class="fas fa-shopping-cart"></i>
                             <span class="badge-cart" id="cart-count">0</span>
+                        </a>
+                    </li>
+                    <!-- NEW: Wishlist icon -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="toggleWishlist()" style="position: relative;">
+                            <i class="fas fa-heart"></i>
+                            <span class="badge-cart" id="wishlist-count" style="background: #e74c3c;">0</span>
                         </a>
                     </li>
                 </ul>
@@ -44,6 +57,18 @@
                 <button class="btn-search" onclick="searchBooks()">
                     <i class="fas fa-search"></i>
                 </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW SECTION: Featured Books Carousel -->
+    <section id="featured" style="padding: 4rem 0; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+        <div class="container-lg">
+            <h2 style="text-align: center; margin-bottom: 3rem; color: var(--primary);">
+                <i class="fas fa-star" style="color: #f39c12;"></i> Featured Best Sellers
+            </h2>
+            <div style="display: flex; gap: 1.5rem; overflow-x: auto; padding: 1rem 0; scroll-behavior: smooth;" id="featuredContainer">
+                <!-- Featured books will be loaded here -->
             </div>
         </div>
     </section>
@@ -84,6 +109,14 @@
                             </div>
                         </div>
 
+                        <!-- NEW: Stock filter -->
+                        <div class="filter-section">
+                            <h5 class="filter-title"><i class="fas fa-box"></i> Availability</h5>
+                            <div class="filter-group">
+                                <label><input type="checkbox" id="inStockOnly" onchange="applyFilters()"> In Stock Only</label>
+                            </div>
+                        </div>
+
                         <div class="filter-section">
                             <h5 class="filter-title"><i class="fas fa-sort"></i> Sort By</h5>
                             <select id="sortSelect" class="form-select" onchange="sortBooks(this.value)">
@@ -103,6 +136,28 @@
             </div>
         </div>
     </section>
+
+    <!-- NEW: Wishlist Sidebar -->
+    <div class="cart-sidebar" id="wishlistSidebar" style="right: -400px;">
+        <div class="cart-header">
+            <span><i class="fas fa-heart" style="color: #e74c3c;"></i> My Wishlist</span>
+            <button class="close-cart" onclick="toggleWishlist()"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="wishlistItems"></div>
+    </div>
+
+    <!-- NEW: Review Modal -->
+    <div id="reviewModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 2rem; border-radius: 15px; max-width: 500px; width: 90%;">
+            <h3>Rate this Book</h3>
+            <div id="reviewStars" style="font-size: 2rem; cursor: pointer; margin: 1rem 0;">
+                ⭐⭐⭐⭐⭐
+            </div>
+            <textarea id="reviewText" placeholder="Write your review..." style="width: 100%; padding: 0.5rem; margin: 1rem 0; border: 1px solid #ddd; border-radius: 5px;"></textarea>
+            <button onclick="submitReview()" class="btn-primary-custom">Submit Review</button>
+            <button onclick="closeReviewModal()" style="margin-left: 1rem;">Cancel</button>
+        </div>
+    </div>
 
     <div class="cart-sidebar" id="cartSidebar">
         <div class="cart-header">
@@ -176,6 +231,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
+        // NEW: Enhanced book data with stock and featured flag
         const booksData = [
             {
                 id: 1,
@@ -187,7 +243,10 @@
                 rating: 4.8,
                 reviews: 342,
                 image: "📚",
-                discount: 35
+                discount: 35,
+                featured: true,  // NEW
+                inStock: true,   // NEW
+                stockCount: 15   // NEW
             },
             {
                 id: 2,
@@ -199,7 +258,10 @@
                 rating: 4.9,
                 reviews: 521,
                 image: "📖",
-                discount: 40
+                discount: 40,
+                featured: true,
+                inStock: true,
+                stockCount: 8
             },
             {
                 id: 3,
@@ -211,7 +273,10 @@
                 rating: 4.7,
                 reviews: 489,
                 image: "📕",
-                discount: 34
+                discount: 34,
+                featured: true,
+                inStock: true,
+                stockCount: 22
             },
             {
                 id: 4,
@@ -223,7 +288,10 @@
                 rating: 4.6,
                 reviews: 612,
                 image: "📗",
-                discount: 37
+                discount: 37,
+                featured: false,
+                inStock: false,  // Out of stock
+                stockCount: 0
             },
             {
                 id: 5,
@@ -235,7 +303,10 @@
                 rating: 4.5,
                 reviews: 387,
                 image: "📙",
-                discount: 38
+                discount: 38,
+                featured: true,
+                inStock: true,
+                stockCount: 12
             },
             {
                 id: 6,
@@ -247,7 +318,10 @@
                 rating: 4.4,
                 reviews: 298,
                 image: "📘",
-                discount: 36
+                discount: 36,
+                featured: false,
+                inStock: true,
+                stockCount: 5
             },
             {
                 id: 7,
@@ -259,7 +333,10 @@
                 rating: 4.7,
                 reviews: 445,
                 image: "📓",
-                discount: 42
+                discount: 42,
+                featured: false,
+                inStock: true,
+                stockCount: 18
             },
             {
                 id: 8,
@@ -271,7 +348,10 @@
                 rating: 4.8,
                 reviews: 576,
                 image: "📔",
-                discount: 33
+                discount: 33,
+                featured: true,
+                inStock: true,
+                stockCount: 7
             },
             {
                 id: 9,
@@ -283,16 +363,56 @@
                 rating: 4.9,
                 reviews: 689,
                 image: "📕",
-                discount: 45
+                discount: 45,
+                featured: true,
+                inStock: true,
+                stockCount: 25
             }
         ];
 
         let cart = [];
+        let wishlist = [];  // NEW
         let filteredBooks = [...booksData];
+        let currentReviewBook = null;  // NEW
 
         function init() {
             renderBooks(filteredBooks);
+            renderFeaturedBooks();  // NEW
             attachFilterListeners();
+            loadSavedData();  // NEW
+        }
+
+        // NEW: Render featured books carousel
+        function renderFeaturedBooks() {
+            const featuredContainer = document.getElementById('featuredContainer');
+            const featuredBooks = booksData.filter(book => book.featured);
+            
+            featuredContainer.innerHTML = featuredBooks.map(book => `
+                <div style="min-width: 250px; background: white; border-radius: 10px; padding: 1rem; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <div style="font-size: 3rem;">${book.image}</div>
+                    <h5 style="margin: 0.5rem 0;">${book.title}</h5>
+                    <p style="color: #7f8c8d;">${book.author}</p>
+                    <div style="color: #f39c12;">${'⭐'.repeat(Math.floor(book.rating))}</div>
+                    <div style="margin: 0.5rem 0;">
+                        <span style="text-decoration: line-through; color: #95a5a6;">$${book.originalPrice}</span>
+                        <strong style="color: var(--secondary); font-size: 1.2rem;"> $${book.price}</strong>
+                    </div>
+                    <button class="btn-primary-custom" onclick="addToCart(${book.id})" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Quick Buy</button>
+                </div>
+            `).join('');
+        }
+
+        // NEW: Dark mode toggle
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const btn = document.querySelector('button[onclick="toggleDarkMode()"] i');
+            if (document.body.classList.contains('dark-mode')) {
+                btn.className = 'fas fa-sun';
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                btn.className = 'fas fa-moon';
+                localStorage.setItem('darkMode', 'disabled');
+            }
         }
 
         function renderBooks(books) {
@@ -306,6 +426,9 @@
 
             books.forEach(book => {
                 const stars = '⭐'.repeat(Math.floor(book.rating));
+                const isInWishlist = wishlist.some(b => b.id === book.id);  // NEW
+                const stockStatus = book.inStock ? `<span style="color: #27ae60; font-size: 0.8rem;"><i class="fas fa-check-circle"></i> In Stock (${book.stockCount})</span>` : `<span style="color: #e74c3c; font-size: 0.8rem;"><i class="fas fa-times-circle"></i> Out of Stock</span>`;  // NEW
+                
                 const bookCard = document.createElement('div');
                 bookCard.className = 'col-md-6 col-lg-4 mb-4';
                 bookCard.innerHTML = `
@@ -313,6 +436,14 @@
                         <div class="book-image">
                             <span style="font-size: 4rem;">${book.image}</span>
                             ${book.discount ? `<div class="book-badge">-${book.discount}%</div>` : ''}
+                            <!-- NEW: Wishlist heart button -->
+                            <button onclick="toggleWishlistItem(${book.id})" style="position: absolute; top: 10px; left: 10px; background: white; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 1.2rem; color: ${isInWishlist ? '#e74c3c' : '#95a5a6'}">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            <!-- NEW: Review button -->
+                            <button onclick="openReviewModal(${book.id})" style="position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.7); border: none; border-radius: 20px; padding: 5px 10px; color: white; cursor: pointer; font-size: 0.8rem;">
+                                <i class="fas fa-star"></i> Review
+                            </button>
                         </div>
                         <div class="book-info">
                             <h3 class="book-title">${book.title}</h3>
@@ -321,12 +452,13 @@
                                 ${stars}
                                 <span style="color: #7f8c8d; font-size: 0.8rem;">(${book.reviews})</span>
                             </div>
+                            <div style="margin-bottom: 0.5rem;">${stockStatus}</div>
                             <div style="margin-bottom: 0.75rem;">
                                 <span class="original-price">$${book.originalPrice.toFixed(2)}</span>
                                 <span class="book-price">$${book.price.toFixed(2)}</span>
                             </div>
-                            <button class="btn-primary-custom" onclick="addToCart(${book.id})">
-                                <i class="fas fa-cart-plus"></i> Add to Cart
+                            <button class="btn-primary-custom" onclick="addToCart(${book.id})" ${!book.inStock ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                                <i class="fas fa-cart-plus"></i> ${book.inStock ? 'Add to Cart' : 'Out of Stock'}
                             </button>
                         </div>
                     </div>
@@ -335,8 +467,117 @@
             });
         }
 
+        // NEW: Toggle wishlist
+        function toggleWishlistItem(bookId) {
+            const book = booksData.find(b => b.id === bookId);
+            const index = wishlist.findIndex(b => b.id === bookId);
+            
+            if (index === -1) {
+                wishlist.push({...book, addedDate: new Date()});
+                showNotification(`${book.title} added to wishlist! ❤️`);
+            } else {
+                wishlist.splice(index, 1);
+                showNotification(`${book.title} removed from wishlist`);
+            }
+            
+            updateWishlistUI();
+            renderBooks(filteredBooks); // Refresh to update heart colors
+            saveToLocalStorage();
+        }
+
+        // NEW: Update wishlist sidebar
+        function updateWishlistUI() {
+            const wishlistContainer = document.getElementById('wishlistItems');
+            const wishlistCount = document.getElementById('wishlist-count');
+            
+            wishlistCount.textContent = wishlist.length;
+            
+            if (wishlist.length === 0) {
+                wishlistContainer.innerHTML = '<div class="cart-empty"><i class="fas fa-heart" style="font-size: 3rem; margin-bottom: 1rem; color: #e74c3c;"></i><p>Your wishlist is empty</p></div>';
+                return;
+            }
+            
+            wishlistContainer.innerHTML = wishlist.map(item => `
+                <div class="cart-item">
+                    <div class="cart-item-image">${item.image}</div>
+                    <div class="cart-item-details">
+                        <div class="cart-item-title">${item.title}</div>
+                        <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+                        <button class="btn-primary-custom" onclick="addToCart(${item.id}); toggleWishlist()" style="padding: 0.3rem 0.5rem; font-size: 0.8rem; margin-top: 0.5rem;">
+                            Move to Cart
+                        </button>
+                    </div>
+                    <button onclick="toggleWishlistItem(${item.id})" style="background: none; border: none; color: #e74c3c; cursor: pointer;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function toggleWishlist() {
+            document.getElementById('wishlistSidebar').classList.toggle('active');
+        }
+
+        // NEW: Review functions
+        let bookReviews = JSON.parse(localStorage.getItem('bookReviews')) || {};
+
+        function openReviewModal(bookId) {
+            currentReviewBook = bookId;
+            document.getElementById('reviewModal').style.display = 'flex';
+        }
+
+        function closeReviewModal() {
+            document.getElementById('reviewModal').style.display = 'none';
+            currentReviewBook = null;
+        }
+
+        function submitReview() {
+            if (!currentReviewBook) return;
+            const rating = document.getElementById('reviewStars').getAttribute('data-rating') || 5;
+            const reviewText = document.getElementById('reviewText').value;
+            
+            if (!bookReviews[currentReviewBook]) {
+                bookReviews[currentReviewBook] = [];
+            }
+            
+            bookReviews[currentReviewBook].push({
+                rating: parseInt(rating),
+                text: reviewText,
+                date: new Date().toISOString(),
+                user: "BookLover" + Math.floor(Math.random() * 1000)
+            });
+            
+            localStorage.setItem('bookReviews', JSON.stringify(bookReviews));
+            showNotification("Thank you for your review! ⭐");
+            closeReviewModal();
+            document.getElementById('reviewText').value = '';
+        }
+
+        // Setup star rating
+        document.addEventListener('DOMContentLoaded', () => {
+            const stars = document.getElementById('reviewStars');
+            if (stars) {
+                stars.addEventListener('mouseover', (e) => {
+                    if (e.target.tagName === 'SPAN') {
+                        const value = e.target.getAttribute('data-value');
+                        stars.innerHTML = '⭐⭐⭐⭐⭐'.slice(0, value);
+                    }
+                });
+                stars.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'SPAN') {
+                        stars.setAttribute('data-rating', e.target.getAttribute('data-value'));
+                    }
+                });
+            }
+        });
+
         function addToCart(bookId) {
             const book = booksData.find(b => b.id === bookId);
+            if (!book.inStock) {
+                showNotification("Sorry, this book is out of stock! 📚");
+                return;
+            }
+            
             const existingItem = cart.find(item => item.id === bookId);
 
             if (existingItem) {
@@ -346,7 +587,8 @@
             }
 
             updateCartUI();
-            showNotification(`${book.title} added to cart!`);
+            showNotification(`${book.title} added to cart! 🛒`);
+            saveToLocalStorage();
         }
 
         function updateCartUI() {
@@ -354,7 +596,7 @@
             const cartCountBadge = document.getElementById('cart-count');
             const cartSummary = document.getElementById('cartSummary');
 
-            cartCountBadge.textContent = cart.length;
+            cartCountBadge.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
 
             if (cart.length === 0) {
                 cartItemsContainer.innerHTML = '<div class="cart-empty"><i class="fas fa-shopping-cart" style="font-size: 3rem; margin-bottom: 1rem;"></i><p>Your cart is empty</p></div>';
@@ -371,11 +613,11 @@
                         <div class="cart-item-price">$${item.price.toFixed(2)}</div>
                         <div class="quantity-control">
                             <button onclick="updateQuantity(${item.id}, -1)">−</button>
-                            <span style="min-width: 20px; text-align: center;">${item.quantity}</span>
+                            <span>${item.quantity}</span>
                             <button onclick="updateQuantity(${item.id}, 1)">+</button>
                         </div>
                     </div>
-                    <button style="background: none; border: none; color: var(--accent); cursor: pointer; font-size: 1.2rem;" onclick="removeFromCart(${item.id})">
+                    <button onclick="removeFromCart(${item.id})" style="background: none; border: none; color: var(--accent); cursor: pointer;">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -394,11 +636,13 @@
                     updateCartUI();
                 }
             }
+            saveToLocalStorage();
         }
 
         function removeFromCart(bookId) {
             cart = cart.filter(item => item.id !== bookId);
             updateCartUI();
+            saveToLocalStorage();
         }
 
         function updateCartSummary() {
@@ -425,6 +669,7 @@
             const selectedCategories = Array.from(document.querySelectorAll('.category-filter:checked')).map(el => el.value);
             const selectedPrices = Array.from(document.querySelectorAll('.price-filter:checked')).map(el => el.value);
             const selectedRatings = Array.from(document.querySelectorAll('.rating-filter:checked')).map(el => parseInt(el.value));
+            const inStockOnly = document.getElementById('inStockOnly')?.checked || false;  // NEW
 
             filteredBooks = booksData.filter(book => {
                 const categoryMatch = selectedCategories.length === 0 || selectedCategories.includes(book.category);
@@ -443,8 +688,10 @@
                 if (selectedRatings.length > 0) {
                     ratingMatch = selectedRatings.some(rating => book.rating >= rating);
                 }
+                
+                const stockMatch = !inStockOnly || book.inStock;  // NEW
 
-                return categoryMatch && priceMatch && ratingMatch;
+                return categoryMatch && priceMatch && ratingMatch && stockMatch;
             });
 
             renderBooks(filteredBooks);
@@ -480,6 +727,25 @@
             renderBooks(filteredBooks);
         }
 
+        // NEW: Save cart and wishlist to localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('bookhubCart', JSON.stringify(cart));
+            localStorage.setItem('bookhubWishlist', JSON.stringify(wishlist));
+        }
+
+        function loadSavedData() {
+            const savedCart = localStorage.getItem('bookhubCart');
+            const savedWishlist = localStorage.getItem('bookhubWishlist');
+            const savedDarkMode = localStorage.getItem('darkMode');
+            
+            if (savedCart) cart = JSON.parse(savedCart);
+            if (savedWishlist) wishlist = JSON.parse(savedWishlist);
+            if (savedDarkMode === 'enabled') toggleDarkMode();
+            
+            updateCartUI();
+            updateWishlistUI();
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('searchInput').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') searchBooks();
@@ -497,6 +763,7 @@
             cart = [];
             updateCartUI();
             toggleCart();
+            saveToLocalStorage();
         }
 
         function showNotification(message) {
@@ -512,11 +779,10 @@
 
         document.addEventListener('click', (e) => {
             const cartSidebar = document.getElementById('cartSidebar');
+            const wishlistSidebar = document.getElementById('wishlistSidebar');
             const cartToggle = document.querySelector('[onclick="toggleCart()"]');
-            if (!cartSidebar.contains(e.target) && !cartToggle.contains(e.target) && cartSidebar.classList.contains('active')) {
+            const wishlistToggle = document.querySelector('[onclick="toggleWishlist()"]');
+            
+            if (cartSidebar && !cartSidebar.contains(e.target) && cartToggle && !cartToggle.contains(e.target) && cartSidebar.classList.contains('active')) {
                 toggleCart();
-            }
-        });
-    </script>
-</body>
-</html>
+           
